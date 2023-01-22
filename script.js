@@ -56,8 +56,4 @@ const copyPassword = () => {
 }
 copyIcon.addEventListener("click", copyPassword);
 lengthSlider.addEventListener("input", updateSlider);
-<<<<<<< Updated upstream
 generateBtn.addEventListener("click", generatePassword);
-=======
-generateBtn.addEventListener("click", generatePassword);
->>>>>>> Stashed changes
