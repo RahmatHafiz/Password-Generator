@@ -1,55 +1,59 @@
-console.log("Halaman berhasil dimuat!");
-
-function generatePassword(
-    passwordLength,
-    useCapitalAToZ,
-    useLowerAToZ,
-    useNumeric
-) {
-    if (passwordLength < 3) {
-        return '(invalid)'
-    }
-    if (!useCapitalAToZ && !useLowerAToZ && !useNumeric) {
-        return '(invalid)';
-    }
-    let result = '';
-    for (let x = 0; x < passwordLength; x++) {
-        const method = randomizeUntil(3);
-        if (method === 0 && useCapitalAToZ) {
-            const randomNumber = randomizeUntil(26);
-            const sumWithLetterA = 'A'.charCodeAt() + randomNumber;
-            const newCharacter = String.fromCharCode(sumWithLetterA);
-            result += newCharacter;
-            continue;
-        }
-        if (method === 1 && useLowerAToZ) {
-            const randomNumber = randomizeUntil(26);
-            const sumWithLowerA = 'a'.charCodeAt() + randomNumber;
-            const newCharacter = String.fromCharCode(sumWithLowerA);
-            result += newCharacter;
-            continue;
-        }
-        if (method === 2 && useNumeric) {
-            const randomNumber = randomizeUntil(10);
-            const sumWithLetterZero = '0'.charCodeAt() + randomNumber;
-            const newCharacter = String.fromCharCode(sumWithLetterZero);
-            result += newCharacter;
-            continue;
-        }
-        x--;
-    }
-    return result;
+const lengthSlider = document.querySelector(".pass-length input"),
+    options = document.querySelectorAll(".option input"),
+    copyIcon = document.querySelector(".input-box span"),
+    passwordInput = document.querySelector(".input-box input"),
+    passIndicator = document.querySelector(".pass-indicator"),
+    generateBtn = document.querySelector(".generate-btn");
+const characters = {
+    lowercase: "abcdefghijklmnopqrstuvwxyz",
+    uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    numbers: "0123456789",
+    symbols: "^!$%&|[](){}:;.,*+-#@<>~"
 }
-
-function randomizeUntil(untilNumber) {
-    return Math.floor(Math.random() * untilNumber);
+const generatePassword = () => {
+    let staticPassword = "",
+        randomPassword = "",
+        excludeDuplicate = false,
+        passLength = lengthSlider.value;
+    options.forEach(option => {
+        if (option.checked) {
+            if (option.id !== "exc-duplicate" && option.id !== "spaces") {
+                staticPassword += characters[option.id];
+            } else if (option.id === "spaces") {
+                staticPassword += `  ${staticPassword}  `;
+            } else {
+                excludeDuplicate = true;
+            }
+        }
+    });
+    for (let i = 0; i < passLength; i++) {
+        let randomChar = staticPassword[Math.floor(Math.random() * staticPassword.length)];
+        if (excludeDuplicate) {
+            !randomPassword.includes(randomChar) || randomChar == " " ? randomPassword += randomChar : i--;
+        } else {
+            randomPassword += randomChar;
+        }
+    }
+    passwordInput.value = randomPassword;
 }
-const generatePasswordButton = document.getElementById('generate_password');
-generatePasswordButton.addEventListener('click', function () {
-    const passwordLength = document.getElementById('password_length').value;
-    const useCapitalAToZ = document.getElementById('capital_az_char').checked;
-    const useLowerAToZ = document.getElementById('small_az_char').checked;
-    const useNumeric = document.getElementById('numeric').checked;
-    const passwordResult = generatePassword(passwordLength, useCapitalAToZ, useLowerAToZ, useNumeric);
-    document.getElementById('result_password').innerText = passwordResult;
-});
+const upadatePassIndicator = () => {
+    passIndicator.id = lengthSlider.value <= 8 ? "weak" : lengthSlider.value <= 16 ? "medium" : "strong";
+}
+const updateSlider = () => {
+    document.querySelector(".pass-length span").innerText = lengthSlider.value;
+    generatePassword();
+    upadatePassIndicator();
+}
+updateSlider();
+const copyPassword = () => {
+    navigator.clipboard.writeText(passwordInput.value);
+    copyIcon.innerText = "check";
+    copyIcon.style.color = "#4285F4";
+    setTimeout(() => {
+        copyIcon.innerText = "copy_all";
+        copyIcon.style.color = "#707070";
+    }, 1500);
+}
+copyIcon.addEventListener("click", copyPassword);
+lengthSlider.addEventListener("input", updateSlider);
+generateBtn.addEventListener("click", generatePassword);
